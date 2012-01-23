@@ -1,0 +1,53 @@
+<html>
+<title>MMT BattleShips</title>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+
+<style type="text/css">
+
+p {
+cursor:pointer;
+}
+
+</style>
+<script>
+var $j = jQuery.noConflict();
+
+$j(document).ready(function(){
+
+  var socket = io.connect('http://localhost');
+  
+  socket.on('news', function (data) {
+    console.log(data);
+    $j('#player-online').append('<p>' + data + '</p>');
+    // alert(data);
+  });
+  
+  $j('#button').click(function(event) {
+    socket.emit("serverSocket", "mmtships:Titanic");
+  }); 
+    
+    var obj = $j("#player-online p");
+    obj.click(function() {
+      var pos = obj.index(this);
+      // $(this)
+      // altert(pos);
+      
+      socket.emit("serverSocket", "mmtships:Titanic:waiting");
+   });
+ 
+  // mmtships:Titanic:waiting
+
+   
+});
+</script>
+</head>
+
+<body>
+
+<button type="submit" id="button">Spielanfrage</button>
+<div id="player-online"></div>
+
+</body>
+</html>
