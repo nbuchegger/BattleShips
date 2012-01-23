@@ -3,19 +3,26 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-
+<script type="text/javascript" src="schiffe.js"></script>
+<meta name="content-language" content="de" />
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+<link rel="stylesheet" href="schiffe.css" type="text/css" />
 <style type="text/css">
 
-p {
+.pointer {
 cursor:pointer;
 }
 
 </style>
 <script>
+
 var $j = jQuery.noConflict();
 
 $j(document).ready(function(){
+	
 
+	
+	 
   var socket = io.connect('http://localhost');
   
   socket.on('news', function (data) {
@@ -39,15 +46,488 @@ $j(document).ready(function(){
  
   // mmtships:Titanic:waiting
 
+ 
+// spieler auflisten
+function parsePlayerList(data){
+	
+ var player =new Array(fritz, box, bob);
+	 
+	
+		 var player = String(data).slice(6).split("#");  
+ 
+		for (var i=0; i < player.length; i++)
+		{
+	 
+		$j("#playerlist").append("<p><br />" + player[i] + "<a href='#' onClick='sendPlayQuery("+"\""+tmp_playernam[i] +"\""+"); /></p>"); 	
+			
+			
+		};
+		
+};
    
 });
 </script>
 </head>
 
-<body>
 
-<button type="submit" id="button">Spielanfrage</button>
+
+
+<body onLoad="setpc()">
+<h1>Schiffe versenken</h1>
+
 <div id="player-online"></div>
+<center>
+  <div class="content"> 
+ 
+    <br />
+    <table width="100%">
+      <tr>
+        <td>
+        <div id="playerlist">
+        asdf
+        </div>
+        <button type="submit" id="button">Spielanfrage</button>
+        
+        </td>
+        <td style="text-align:right">&nbsp;</td>
+      </tr>
+    </table>
+    <br />
+    <table border="0" cellspacing="0" cellpadding="10">
+      <tr>
+        <td><b>Feindliche Flotte:</b></td>
+        <td><b>Eigene Flotte:</b></td>
+        <td style="vertical-align:top" rowspan="2"><div id="place">
+            <h2>Schiffe platzieren:</h2>
+            (Gib die Anfangs- und Endkoordinaten der Schiffe an, z.B. f&uuml;r den Flugzeugtr&auml;ger a0 - e0, oder vertikal a0 - a4. Oder lass dir die Schiffe per Zufall aufstellen.)<br />
+            <br />
+            <noscript>
+            <div style="color:#900000;font-weight:bold">JavaScript muss aktiviert sein, damit das Spiel funktioniert. <br />
+              <a href="http://jumk.de/javascript.html">Anleitung JavaScript aktivieren</a> </div>
+            <br />
+            <br />
+            </noscript>
+            <input type="button" value="Zufallsaufstellung" onClick="rnd1()" />
+                       <input type="button" value="Zufallsaufstellung" onClick="sendUdpPacket()" />
+            &nbsp;&nbsp;&nbsp;
+            <input type="button" value="Mit dieser Aufstellung spielen" style="visibility:hidden" onClick="begin()" id="start" />
+            <table border="0" cellspacing="0" cellpadding="0">
+              <tr>
+                <td>Flugzeugtr&auml;ger</td>
+              </tr>
+              <tr>
+                <td><table border="0" cellspacing="1" cellpadding="0" style="background-color:#000000">
+                    <tr>
+                      <td style="width:20px;height:20px;background-color:#ffff00"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+                      <td style="width:20px;height:20px;background-color:#ffff00"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+                      <td style="width:20px;height:20px;background-color:#ffff00"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+                      <td style="width:20px;height:20px;background-color:#ffff00"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+                      <td style="width:20px;height:20px;background-color:#ffff00"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+                    </tr>
+                  </table></td>
+                <td colspan="2">&nbsp;
+                  <input style="width:20px" id="s51" />
+                  -
+                  <input style="width:20px" id="s52" />
+                  &nbsp;
+                  <input type="button" value="Setzen" style="width:80px" onClick="set(5)" />
+                  &nbsp;
+                  <input type="button" value="L&ouml;schen" style="width:80px" onClick="del(5)" /></td>
+              </tr>
+              <tr>
+                <td>Zerst&ouml;rer</td>
+              </tr>
+              <tr>
+                <td><table border="0" cellspacing="1" cellpadding="0" style="background-color:#000000">
+                    <tr>
+                      <td style="width:20px;height:20px;background-color:#ffff00"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+                      <td style="width:20px;height:20px;background-color:#ffff00"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+                      <td style="width:20px;height:20px;background-color:#ffff00"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+                      <td style="width:20px;height:20px;background-color:#ffff00"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+                    </tr>
+                  </table></td>
+                <td colspan="2">&nbsp;
+                  <input style="width:20px" id="s41" />
+                  -
+                  <input style="width:20px" id="s42" />
+                  &nbsp;
+                  <input type="button" value="Setzen" style="width:80px" onClick="set(4)" />
+                  &nbsp;
+                  <input type="button" value="L&ouml;schen" style="width:80px" onClick="del(4)" /></td>
+              </tr>
+              <tr>
+                <td>Fregatte</td>
+              </tr>
+              <tr>
+                <td><table border="0" cellspacing="1" cellpadding="0" style="background-color:#000000">
+                    <tr>
+                      <td style="width:20px;height:20px;background-color:#ffff00"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+                      <td style="width:20px;height:20px;background-color:#ffff00"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+                      <td style="width:20px;height:20px;background-color:#ffff00"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+                    </tr>
+                  </table></td>
+                <td colspan="2">&nbsp;
+                  <input style="width:20px" id="s31" />
+                  -
+                  <input style="width:20px" id="s32" />
+                  &nbsp;
+                  <input type="button" value="Setzen" style="width:80px" onClick="set(3)" />
+                  &nbsp;
+                  <input type="button" value="L&ouml;schen" style="width:80px" onClick="del(3)" /></td>
+              </tr>
+              <tr>
+                <td>Kreuzer</td>
+              </tr>
+              <tr>
+                <td><table border="0" cellspacing="1" cellpadding="0" style="background-color:#000000">
+                    <tr>
+                      <td style="width:20px;height:20px;background-color:#ffff00"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+                      <td style="width:20px;height:20px;background-color:#ffff00"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+                    </tr>
+                  </table></td>
+                <td colspan="2">&nbsp;
+                  <input style="width:20px" id="s21" />
+                  -
+                  <input style="width:20px" id="s22" />
+                  &nbsp;
+                  <input type="button" value="Setzen" style="width:80px" onClick="set(2)" />
+                  &nbsp;
+                  <input type="button" value="L&ouml;schen" style="width:80px" onClick="del(2)" /></td>
+              </tr>
+              <tr>
+                <td>Schnellboot</td>
+              </tr>
+              <tr>
+                <td><table border="0" cellspacing="1" cellpadding="0" style="background-color:#000000">
+                    <tr>
+                      <td style="width:20px;height:20px;background-color:#ffff00"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+                    </tr>
+                  </table></td>
+                <td colspan="2">&nbsp;
+                  <input style="width:20px" id="s11" />
+                  <span style="visibility:hidden"> -
+                  <input style="width:20px" />
+                  </span> &nbsp;
+                  <input type="button" value="Setzen" style="width:80px" onClick="set(1)" />
+                  &nbsp;
+                  <input type="button" value="L&ouml;schen" style="width:80px" onClick="del(1)" /></td>
+              </tr>
+            </table>
+          </div>
+          <div id="game" style="display:none"> <br />
+            <br />
+            <br />
+            Klicke in die feindliche Karte, um zu schie&#223;en.<br />
+            <br />
+            <b>Spieler:</b><br />
+            <input style="width:200px" id="sp1" onFocus="this.blur()" />
+            <br />
+            <input style="width:200px" id="sp2" onFocus="this.blur()" />
+            <br />
+            <b>Computer:</b><br />
+            <input style="width:200px" id="co1" onFocus="this.blur()" />
+            <br />
+            <input style="width:200px" id="co2" onFocus="this.blur()" />
+            <br />
+          </div></td>
+      </tr>
+      <tr>
+        <td style="vertical-align:top"><table border="0" cellspacing="1" cellpadding="0" style="background-color:#000000">
+            <tr style="text-align:center">
+              <td>&nbsp;</td>
+              <td>A</td>
+              <td>B</td>
+              <td>C</td>
+              <td>D</td>
+              <td>E</td>
+              <td>F</td>
+              <td>G</td>
+              <td>H</td>
+              <td>I</td>
+              <td>J</td>
+            </tr>
+            <tr>
+              <td style="height:20px">&nbsp;0&nbsp;</td>
+              <td style="width:20px;height:20px" id="a00" onClick="shoot(0,0)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a10" onClick="shoot(1,0)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a20" onClick="shoot(2,0)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a30" onClick="shoot(3,0)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a40" onClick="shoot(4,0)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a50" onClick="shoot(5,0)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a60" onClick="shoot(6,0)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a70" onClick="shoot(7,0)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a80" onClick="shoot(8,0)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a90" onClick="shoot(9,0)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+            </tr>
+            <tr>
+              <td style="height:20px">&nbsp;1&nbsp;</td>
+              <td style="width:20px;height:20px" id="a01" onClick="shoot(0,1)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a11" onClick="shoot(1,1)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a21" onClick="shoot(2,1)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a31" onClick="shoot(3,1)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a41" onClick="shoot(4,1)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a51" onClick="shoot(5,1)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a61" onClick="shoot(6,1)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a71" onClick="shoot(7,1)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a81" onClick="shoot(8,1)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a91" onClick="shoot(9,1)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+            </tr>
+            <tr>
+              <td style="height:20px">&nbsp;2&nbsp;</td>
+              <td style="width:20px;height:20px" id="a02" onClick="shoot(0,2)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a12" onClick="shoot(1,2)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a22" onClick="shoot(2,2)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a32" onClick="shoot(3,2)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a42" onClick="shoot(4,2)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a52" onClick="shoot(5,2)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a62" onClick="shoot(6,2)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a72" onClick="shoot(7,2)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a82" onClick="shoot(8,2)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a92" onClick="shoot(9,2)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+            </tr>
+            <tr>
+              <td style="height:20px">&nbsp;3&nbsp;</td>
+              <td style="width:20px;height:20px" id="a03" onClick="shoot(0,3)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a13" onClick="shoot(1,3)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a23" onClick="shoot(2,3)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a33" onClick="shoot(3,3)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a43" onClick="shoot(4,3)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a53" onClick="shoot(5,3)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a63" onClick="shoot(6,3)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a73" onClick="shoot(7,3)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a83" onClick="shoot(8,3)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a93" onClick="shoot(9,3)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+            </tr>
+            <tr>
+              <td style="height:20px">&nbsp;4&nbsp;</td>
+              <td style="width:20px;height:20px" id="a04" onClick="shoot(0,4)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a14" onClick="shoot(1,4)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a24" onClick="shoot(2,4)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a34" onClick="shoot(3,4)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a44" onClick="shoot(4,4)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a54" onClick="shoot(5,4)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a64" onClick="shoot(6,4)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a74" onClick="shoot(7,4)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a84" onClick="shoot(8,4)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a94" onClick="shoot(9,4)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+            </tr>
+            <tr>
+              <td style="height:20px">&nbsp;5&nbsp;</td>
+              <td style="width:20px;height:20px" id="a05" onClick="shoot(0,5)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a15" onClick="shoot(1,5)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a25" onClick="shoot(2,5)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a35" onClick="shoot(3,5)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a45" onClick="shoot(4,5)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a55" onClick="shoot(5,5)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a65" onClick="shoot(6,5)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a75" onClick="shoot(7,5)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a85" onClick="shoot(8,5)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a95" onClick="shoot(9,5)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+            </tr>
+            <tr>
+              <td style="height:20px">&nbsp;6&nbsp;</td>
+              <td style="width:20px;height:20px" id="a06" onClick="shoot(0,6)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a16" onClick="shoot(1,6)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a26" onClick="shoot(2,6)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a36" onClick="shoot(3,6)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a46" onClick="shoot(4,6)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a56" onClick="shoot(5,6)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a66" onClick="shoot(6,6)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a76" onClick="shoot(7,6)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a86" onClick="shoot(8,6)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a96" onClick="shoot(9,6)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+            </tr>
+            <tr>
+              <td style="height:20px">&nbsp;7&nbsp;</td>
+              <td style="width:20px;height:20px" id="a07" onClick="shoot(0,7)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a17" onClick="shoot(1,7)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a27" onClick="shoot(2,7)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a37" onClick="shoot(3,7)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a47" onClick="shoot(4,7)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a57" onClick="shoot(5,7)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a67" onClick="shoot(6,7)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a77" onClick="shoot(7,7)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a87" onClick="shoot(8,7)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a97" onClick="shoot(9,7)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+            </tr>
+            <tr>
+              <td style="height:20px">&nbsp;8&nbsp;</td>
+              <td style="width:20px;height:20px" id="a08" onClick="shoot(0,8)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a18" onClick="shoot(1,8)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a28" onClick="shoot(2,8)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a38" onClick="shoot(3,8)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a48" onClick="shoot(4,8)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a58" onClick="shoot(5,8)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a68" onClick="shoot(6,8)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a78" onClick="shoot(7,8)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a88" onClick="shoot(8,8)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a98" onClick="shoot(9,8)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+            </tr>
+            <tr>
+              <td style="height:20px">&nbsp;9&nbsp;</td>
+              <td style="width:20px;height:20px" id="a09" onClick="shoot(0,9)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a19" onClick="shoot(1,9)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a29" onClick="shoot(2,9)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a39" onClick="shoot(3,9)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a49" onClick="shoot(4,9)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a59" onClick="shoot(5,9)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a69" onClick="shoot(6,9)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a79" onClick="shoot(7,9)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a89" onClick="shoot(8,9)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="a99" onClick="shoot(9,9)"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+            </tr>
+          </table></td>
+        <td style="vertical-align:top"><table border="0" cellspacing="1" cellpadding="0" style="background-color:#000000">
+            <tr style="text-align:center">
+              <td>&nbsp;</td>
+              <td>A</td>
+              <td>B</td>
+              <td>C</td>
+              <td>D</td>
+              <td>E</td>
+              <td>F</td>
+              <td>G</td>
+              <td>H</td>
+              <td>I</td>
+              <td>J</td>
+            </tr>
+            <tr>
+              <td style="height:20px">&nbsp;0&nbsp;</td>
+              <td style="width:20px;height:20px" id="b00"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b10"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b20"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b30"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b40"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b50"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b60"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b70"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b80"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b90"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+            </tr>
+            <tr>
+              <td style="height:20px">&nbsp;1&nbsp;</td>
+              <td style="width:20px;height:20px" id="b01"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b11"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b21"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b31"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b41"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b51"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b61"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b71"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b81"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b91"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+            </tr>
+            <tr>
+              <td style="height:20px">&nbsp;2&nbsp;</td>
+              <td style="width:20px;height:20px" id="b02"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b12"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b22"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b32"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b42"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b52"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b62"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b72"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b82"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b92"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+            </tr>
+            <tr>
+              <td style="height:20px">&nbsp;3&nbsp;</td>
+              <td style="width:20px;height:20px" id="b03"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b13"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b23"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b33"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b43"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b53"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b63"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b73"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b83"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b93"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+            </tr>
+            <tr>
+              <td style="height:20px">&nbsp;4&nbsp;</td>
+              <td style="width:20px;height:20px" id="b04"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b14"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b24"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b34"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b44"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b54"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b64"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b74"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b84"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b94"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+            </tr>
+            <tr>
+              <td style="height:20px">&nbsp;5&nbsp;</td>
+              <td style="width:20px;height:20px" id="b05"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b15"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b25"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b35"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b45"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b55"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b65"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b75"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b85"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b95"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+            </tr>
+            <tr>
+              <td style="height:20px">&nbsp;6&nbsp;</td>
+              <td style="width:20px;height:20px" id="b06"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b16"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b26"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b36"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b46"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b56"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b66"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b76"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b86"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b96"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+            </tr>
+            <tr>
+              <td style="height:20px">&nbsp;7&nbsp;</td>
+              <td style="width:20px;height:20px" id="b07"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b17"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b27"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b37"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b47"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b57"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b67"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b77"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b87"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b97"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+            </tr>
+            <tr>
+              <td style="height:20px">&nbsp;8&nbsp;</td>
+              <td style="width:20px;height:20px" id="b08"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b18"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b28"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b38"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b48"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b58"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b68"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b78"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b88"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b98"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+            </tr>
+            <tr>
+              <td style="height:20px">&nbsp;9&nbsp;</td>
+              <td style="width:20px;height:20px" id="b09"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b19"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b29"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b39"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b49"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b59"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b69"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b79"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b89"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+              <td style="width:20px;height:20px" id="b99"><img src="dummy.gif" width="20" height="18" border="0" alt="" /></td>
+            </tr>
+          </table></td>
+      </tr>
+    </table>
+    <br />
+    
+  </div>
+</center>
 
 </body>
 </html>
