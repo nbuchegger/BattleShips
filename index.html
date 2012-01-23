@@ -31,8 +31,8 @@ $j(document).ready(function(){
     var obj = $j("#player-online p");
     obj.click(function() {
       var pos = obj.index(this);
-      // $(this)
-      // altert(pos);
+	  $j(this).
+       
       
       socket.emit("serverSocket", "mmtships:Titanic:waiting");
    });

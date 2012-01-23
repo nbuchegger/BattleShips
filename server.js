@@ -1,11 +1,29 @@
 // 78.104.171.255
 
 var app = require('http').createServer(handler)
-  , io = require('socket.io').listen(app)
+   , io = require('socket.io').listen(app)
   , fs = require('fs')
-  , clientSocket;
+  , players = []
+  , dgram = require('dgram')
+  , myPlayername = "Niki"
+  , broadcastSent = false
+	, lastReceivingPlayer = ""
+  , nextCommand = false
+  , showInfo = true
+  , gotInvitation = false
+  , id = 0
+  , lastId = 0
+  , status = "waiting"
+  , stopSendAliveMsg = false
+  , timeout = 20000
+  , chosenPlayer = ""
+  , broadcastAddress = "localhost"//"78.104.171.255";
+  , sendPort = "4321"
+  , receivePort = "1234";
   
 app.listen(3001);
+  
+ 
 
 function handler (req, res) {
   fs.readFile(__dirname + '/index.html',
