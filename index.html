@@ -20,7 +20,7 @@ var $j = jQuery.noConflict();
 
 $j(document).ready(function(){
 	
-
+var playername = "mmtships:Titanic";
 	
 	 
   var socket = io.connect('http://localhost');
@@ -39,26 +39,33 @@ $j(document).ready(function(){
     obj.click(function() {
       var pos = obj.index(this);
 	  $j(this).
-       
-      
       socket.emit("serverSocket", "mmtships:Titanic:waiting");
    });
  
   // mmtships:Titanic:waiting
-
- 
-// spieler auflisten
-function parsePlayerList(data){
+  function sendUdpPaket(){
+    socket.emit("serverSocket", "mmtships:Titanic");
+       
+  } 
+ function sendPlayQuery(playername){
+	   socket.emit("serverSocket", "mmtships:Titanic");
+	  	socket.emit('myGameSocket', playername+":startgame");
+	}
 	
- var player =new Array(fritz, box, bob);
+	
+// spieler auflisten
+ function parsePlayerList(data){
+	
+ var player =["fritz, box, puppy"];
 	 
 	
-		 var player = String(data).slice(6).split("#");  
+	  var player = String(data).slice(6).split("#");  
  
 		for (var i=0; i < player.length; i++)
 		{
 	 
-		$j("#playerlist").append("<p><br />" + player[i] + "<a href='#' onClick='sendPlayQuery("+"\""+tmp_playernam[i] +"\""+"); /></p>"); 	
+	  $("#player-online").append("<p>"+player[i]+"</p>");
+		 $j("#player-online").append("<p><br />" + player[i] + "<a href='#' onClick='sendPlayQuery("+"\""+tmp_playernam[i] +"\""+"); /></p>"); 	
 			
 			
 		};
@@ -83,9 +90,7 @@ function parsePlayerList(data){
     <table width="100%">
       <tr>
         <td>
-        <div id="playerlist">
-        asdf
-        </div>
+       
         <button type="submit" id="button">Spielanfrage</button>
         
         </td>
@@ -108,7 +113,7 @@ function parsePlayerList(data){
             <br />
             </noscript>
             <input type="button" value="Zufallsaufstellung" onClick="rnd1()" />
-                       <input type="button" value="Zufallsaufstellung" onClick="sendUdpPacket()" />
+                       <input type="button" value="Zufallsaufstellung" onClick="sendPlayQuery()" />
             &nbsp;&nbsp;&nbsp;
             <input type="button" value="Mit dieser Aufstellung spielen" style="visibility:hidden" onClick="begin()" id="start" />
             <table border="0" cellspacing="0" cellpadding="0">
