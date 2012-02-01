@@ -47,7 +47,7 @@
 
 <script type="text/javascript">
 
-var socket = io.connect('http://localhost');
+var socket = io.connect('http://localhost:3001');
 
 var $j = jQuery.noConflict();
 
@@ -58,6 +58,7 @@ var selectedPlayerIP;
 var interval;
 var time;
 var autoIncrementID = 0;
+var myTurn = false;
 
 $j(document).ready(function(){
 
@@ -118,6 +119,52 @@ $j(document).ready(function(){
         writePlayerList(playerName, playerIP);
       }
     }
+
+    // game
+    var gameMessages = data.slice(0, data.search('#'));
+
+    if (importantMessage.slice(0,12) == 'positionsset') {
+      autoIncrementID = parseInt(gameMessages.slice(gameMessages.lastIndexOf(':') + 1, gameMessages.length));
+      autoIncrementID++;
+      var msg = 'mmtships:okyourturn:' + autoIncrementID;
+      socket.emit('playRequest', msg, selectedPlayerIP);
+    } 
+    else if (importantMessage.slice(0,10) == 'okyourturn') {
+      myTurn = true;
+    } 
+    else if (importantMessage.slice(0,4) == 'shot') {
+      autoIncrementID = parseInt(gameMessages.slice(gameMessages.lastIndexOf(':') + 1, gameMessages.length));
+      autoIncrementID++;
+
+      var posX = importantMessage.slice(5, 6);
+      var poxY = importantMessage.slice(7, 8);
+      var msg;
+
+      if (computer[poxY][posX][0] < 100) {
+        setImage(poxY, posX, 103, true);
+        msg = 'mmtships:hit:' + autoIncrementID;
+        socket.emit('playRequest', msg, selectedPlayerIP);
+      } else if (computer[poxY][posX][0] == 100) {
+        setImage(poxY, posX, 102,true);
+        msg = 'mmtships:miss:' + autoIncrementID;
+        socket.emit('playRequest', msg, selectedPlayerIP);
+      }
+    } 
+    else if (importantMessage.slice(0,3) == 'hit') {
+      autoIncrementID = parseInt(gameMessages.slice(gameMessages.lastIndexOf(':') + 1, gameMessages.length));
+      autoIncrementID++;
+      // ToDo: Wir haben getroffen! Im Spielfeld anzeigen! Wir dürfen nochmal!
+    } 
+    else if (importantMessage.slice(0,4) == 'miss') {
+      // ToDo: Wir haben nichts getroffen! Im Spielfeld anzeigen!
+    } 
+    else if (importantMessage.slice(0,8) == 'nextturn') {
+      // ToDo: Der Gegner hat nichts getroffen - also sind wir wieder dran!
+    } 
+    else if (importantMessage.slice(0,17) == 'allshipsdestroyed') {
+      alert('Du hast gewonnen!');
+    }
+
   });
 
   $j('#button').click(function(event) {
@@ -167,7 +214,6 @@ $j(document).ready(function(){
     });
     $j('#start-game').fadeOut('slow', function() {});
   });
-
 });
 </script>
 </head>
@@ -298,9 +344,12 @@ function showGrid(ispc) {
 
 /* Handler for clicking on the grid */
 function gridClick(y,x) {
+  if ( myTurn == false) 
+    return;
+
   socket.emit('playRequest', 'mmtships:shot:' + x + ':' + y, selectedPlayerIP);
 
-  if ( playflag ) {
+  /* if ( playflag ) {
     if (computer[y][x][0] < 100) {
       setImage(y,x,103,true);
       var shipno = computer[y][x][1];
@@ -319,7 +368,7 @@ function gridClick(y,x) {
       setImage(y,x,102,true);
       computerMove();
     }
-  }
+  } */
 }
 
 /* Function to make the computers move. Note that the computer does not cheat, oh no! */
@@ -328,118 +377,108 @@ function computerMove() {
   var sx,sy;
   var selected = false;
 
-/* Make two passes during 'shoot to kill' mode
-*/
-for (pass=0;pass<2;++pass) {
-for (y=0;y<gridy && !selected;++y) {
-for (x=0;x<gridx && !selected;++x) {
-/* Explosion shown at this position
-*/
-if (player[y][x][0]==103) {
-sx=x; sy=y;
-var nup=(y>0 && player[y-1][x][0]<=100);
-var ndn=(y<gridy-1 && player[y+1][x][0]<=100);
-var nlt=(x>0 && player[y][x-1][0]<=100);
-var nrt=(x<gridx-1 && player[y][x+1][0]<=100);
-if ( pass == 0 ) {
-/* On first pass look for two explosions
-   in a row - next shot will be inline
-*/
-var yup=(y>0 && player[y-1][x][0]==103);
-var ydn=(y<gridy-1 && player[y+1][x][0]==103);
-var ylt=(x>0 && player[y][x-1][0]==103);
-var yrt=(x<gridx-1 && player[y][x+1][0]==103);
-if ( nlt && yrt) { sx = x-1; selected=true; }
-else if ( nrt && ylt) { sx = x+1; selected=true; }
-else if ( nup && ydn) { sy = y-1; selected=true; }
-else if ( ndn && yup) { sy = y+1; selected=true; }
-}
-else {
-/* Second pass look for single explosion - 
-   fire shots all around it
-*/
-if ( nlt ) { sx=x-1; selected=true; }
-else if ( nrt ) { sx=x+1; selected=true; }
-else if ( nup ) { sy=y-1; selected=true; }
-else if ( ndn ) { sy=y+1; selected=true; }
+  /* Make two passes during 'shoot to kill' mode */
+  for (pass=0;pass<2;++pass) {
+    for (y=0;y<gridy && !selected;++y) {
+      for (x=0;x<gridx && !selected;++x) {
+        /* Explosion shown at this position */
+        if (player[y][x][0]==103) {
+          sx=x; sy=y;
+          var nup=(y>0 && player[y-1][x][0]<=100);
+          var ndn=(y<gridy-1 && player[y+1][x][0]<=100);
+          var nlt=(x>0 && player[y][x-1][0]<=100);
+          var nrt=(x<gridx-1 && player[y][x+1][0]<=100);
+          if ( pass == 0 ) {
+            /* On first pass look for two explosions in a row - next shot will be inline */
+            var yup=(y>0 && player[y-1][x][0]==103);
+            var ydn=(y<gridy-1 && player[y+1][x][0]==103);
+            var ylt=(x>0 && player[y][x-1][0]==103);
+            var yrt=(x<gridx-1 && player[y][x+1][0]==103);
+            if ( nlt && yrt) { sx = x-1; selected=true; }
+              else if ( nrt && ylt) { sx = x+1; selected=true; }
+              else if ( nup && ydn) { sy = y-1; selected=true; }
+              else if ( ndn && yup) { sy = y+1; selected=true; }
+          } else {
+          /* Second pass look for single explosion - fire shots all around it */
+            if ( nlt ) { sx=x-1; selected=true; }
+              else if ( nrt ) { sx=x+1; selected=true; }
+              else if ( nup ) { sy=y-1; selected=true; }
+              else if ( ndn ) { sy=y+1; selected=true; }
             }
-         }
+        }
       }
-   }
-}
-if ( !selected ) {
-/* Nothing found in 'shoot to kill' mode, so we're just taking
-   potshots. Random shots are in a chequerboard pattern for 
-   maximum efficiency, and never twice in the same place
-*/
-do{
-sy = Math.floor(Math.random() * gridy);
-sx = Math.floor(Math.random() * gridx/2)*2+sy%2;
-} while( player[sy][sx][0]>100 );
-}
-if (player[sy][sx][0] < 100) {
-/* Hit something
-*/
-setImage(sy,sx,103,false);
-var shipno = player[sy][sx][1];
-if ( --playersships[shipno][1] == 0 ) {
-sinkShip(player,shipno,false);
-alert("Ich habe Ihr "+shiptypes[playersships[shipno][0]][0]+" versenkt!");
-if ( --playerlives == 0 ) {
-knowYourEnemy();
-alert("Ich habe gewonnen!");
-playflag = false;
+    }
+  }
+  if ( !selected ) {
+    /* Nothing found in 'shoot to kill' mode, so we're just taking potshots. Random shots are in a chequerboard pattern for maximum efficiency, and never twice in the same place */
+    do{
+      sy = Math.floor(Math.random() * gridy);
+      sx = Math.floor(Math.random() * gridx/2)*2+sy%2;
+    } while( player[sy][sx][0]>100 );
+  }
+  if (player[sy][sx][0] < 100) {
+    /* Hit something */
+    setImage(sy,sx,103,false);
+    var shipno = player[sy][sx][1];
+    if ( --playersships[shipno][1] == 0 ) {
+      sinkShip(player,shipno,false);
+      alert("Ich habe Ihr "+shiptypes[playersships[shipno][0]][0]+" versenkt!");
+      if ( --playerlives == 0 ) {
+        knowYourEnemy();
+        alert("Ich habe gewonnen!");
+        playflag = false;
       }
-   }
-}
-else {
-/* Missed
-*/
-setImage(sy,sx,102,false);
-   }
+    }
+  } else {
+    /* Missed */
+    setImage(sy,sx,102,false);
+  }
 }
 
-/* When whole ship is hit, show it using changed graphics
-*/
+/* When whole ship is hit, show it using changed graphics */
 function sinkShip(grid,shipno,ispc) {
-var y,x;
-for (y=0;y<gridx;++y) {
-for (x=0;x<gridx;++x) {
-if ( grid[y][x][1] == shipno )
-if (ispc) setImage(y,x,computer[y][x][2],true);
-else setImage(y,x,player[y][x][2],false);
+  var y,x;
+  for (y=0;y<gridx;++y) {
+    for (x=0;x<gridx;++x) {
+      if ( grid[y][x][1] == shipno )
+        if (ispc) 
+          setImage(y,x,computer[y][x][2],true);
+        else 
+          setImage(y,x,player[y][x][2],false);
       }
    }
 }
 
 /* Show location of all the computers ships - when player has lost */
 function knowYourEnemy() {
-var y,x;
-for (y=0;y<gridx;++y) {
-for (x=0;x<gridx;++x) {
-if ( computer[y][x][0] == 103 )
-setImage(y,x,computer[y][x][2],true);
-else if ( computer[y][x][0] < 100 )
-setImage(y,x,computer[y][x][0],true);
-      }
-   }
+  var y,x;
+  for (y=0;y<gridx;++y) {
+    for (x=0;x<gridx;++x) {
+      if ( computer[y][x][0] == 103 )
+        setImage(y,x,computer[y][x][2],true);
+      else if ( computer[y][x][0] < 100 )
+        setImage(y,x,computer[y][x][0],true);
+    }
+  }
 }
 
 /* Show how many ships computer has left */
 function updateStatus() {
-var f=false,i,s = "Computer hat ";
-for (i=0;i<computersships.length;++i) {
-if (computersships[i][1] > 0) {
-if (f) s=s+", "; else f=true;
-s = s + shiptypes[computersships[i][0]][0];
-   }
+  var f=false,i,s = "Computer hat ";
+  for (i=0;i<computersships.length;++i) {
+    if (computersships[i][1] > 0) {
+      if (f) s=s+", "; else f=true;
+        s = s + shiptypes[computersships[i][0]][0];
+    }
+  }
+  if (!f) 
+    s = s + "nothing left, thanks to you!";
+  statusmsg = s;
+  window.status = statusmsg;
 }
-if (!f) s = s + "nothing left, thanks to you!";
-statusmsg = s;
-window.status = statusmsg;
-}
+
 function setStatus() {
-window.status = statusmsg;
+  window.status = statusmsg;
 }
 
 /* Start the game! */

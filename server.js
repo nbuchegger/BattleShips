@@ -43,7 +43,7 @@ function sendUdpPaketOutside(data){
   var message = new Buffer(String(data));
   var socketOutside = dgram.createSocket('udp4');
   
-  socketOutside.send(message, 0, message.length, port, '78.104.171.255', function(err, bytes) { // 78.104.171.255
+  socketOutside.send(message, 0, message.length, port, 'localhost', function(err, bytes) { // 78.104.171.255
     socketOutside.close();
   });
 }
