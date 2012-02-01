@@ -9,6 +9,7 @@ app.listen(3001);
 
 function handler (req, res) {
   fs.readFile(__dirname + '/index.html',
+  fs.readFile(__dirname + '/style.css'),
   function (err, data) {
     if (err) {
       res.writeHead(500);
@@ -42,7 +43,7 @@ function sendUdpPaketOutside(data){
   var message = new Buffer(String(data));
   var socketOutside = dgram.createSocket('udp4');
   
-  socketOutside.send(message, 0, message.length, port, "78.104.171.255", function(err, bytes) {
+  socketOutside.send(message, 0, message.length, port, '78.104.171.255', function(err, bytes) { // 78.104.171.255
     socketOutside.close();
   });
 }
@@ -60,4 +61,3 @@ server.on('message', function (msg, rinfo) {
   // }
 });
 server.bind(1234);
-
