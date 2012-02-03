@@ -54,7 +54,7 @@ var $j = jQuery.noConflict();
 var myPlayerName = 'Niki';
 var myPlayState = 'waiting';
 var playerName;
-var selectedPlayerIP;
+var playerIP;
 var interval;
 var time;
 var autoIncrementID = 0;
@@ -72,7 +72,7 @@ $j(document).ready(function(){
     var foundColon = importantMessage.search(':');
 
     var findIP = importantMessage.search('#');
-    var playerIP = importantMessage.slice(findIP + 1, dataLength);
+    playerIP = importantMessage.slice(findIP + 1, dataLength);
 
     // check, if player plays mmtships :)
     var checkGame = data.slice(0, 8);
@@ -89,7 +89,7 @@ $j(document).ready(function(){
       // if getting a new play request
       if (playerMessage == 'startgame') {
         if (confirm(playerName + ' moechte mit dir spielen!')) {
-          selectedPlayerIP = playerIP;
+          var selectedPlayerIP = playerIP;
           socket.emit('playRequest', 'mmtships:accepted', selectedPlayerIP);
           interval = setInterval(function() {
             socket.emit('playRequest', 'mmtships:alive', selectedPlayerIP);
@@ -109,7 +109,7 @@ $j(document).ready(function(){
       } else if (playerMessage == 'accepted') {
         clearTimeout(time);
         interval = setInterval(function() {
-          socket.emit('playRequest', 'mmtships:alive', selectedPlayerIP);
+          socket.emit('playRequest', 'mmtships:alive', playerIP);
         }, 2000);
         startGame();
       } else if (playerMessage == 'alive') {
@@ -124,10 +124,11 @@ $j(document).ready(function(){
     var gameMessages = data.slice(0, data.search('#'));
 
     if (importantMessage.slice(0,12) == 'positionsset') {
-      autoIncrementID = parseInt(gameMessages.slice(gameMessages.lastIndexOf(':') + 1, gameMessages.length));
-      autoIncrementID++;
-      var msg = 'mmtships:okyourturn:' + autoIncrementID;
-      socket.emit('playRequest', msg, selectedPlayerIP);
+      // autoIncrementID = parseInt(gameMessages.slice(gameMessages.lastIndexOf(':') + 1, gameMessages.length));
+      // autoIncrementID++;
+      alert ('your turn');
+      var msg = 'mmtships:okyourturn';
+      socket.emit('playRequest', msg, playerIP);
     } 
     else if (importantMessage.slice(0,10) == 'okyourturn') {
       myTurn = true;
@@ -143,21 +144,24 @@ $j(document).ready(function(){
       if (player[poxY][posX][0] < 100) {
         setImage(poxY, posX, 103, true);
         msg = 'mmtships:hit:' + autoIncrementID;
-        socket.emit('playRequest', msg, selectedPlayerIP);
+        socket.emit('playRequest', msg, playerIP);
       } else if (player[poxY][posX][0] == 100) {
-        setImage(poxY, posX, 102,true);
+        setImage(poxY, posX, 102, true);
         msg = 'mmtships:miss:' + autoIncrementID;
-        socket.emit('playRequest', msg, selectedPlayerIP);
+        socket.emit('playRequest', msg, playerIP);
       }
     } 
     else if (importantMessage.slice(0,3) == 'hit') {
       // autoIncrementID = parseInt(gameMessages.slice(gameMessages.lastIndexOf(':') + 1, gameMessages.length));
       // autoIncrementID++;
-      var posX = importantMessage.slice(5, 6);
-      var poxY = importantMessage.slice(7, 8);
+      var posX = importantMessage.slice(4, 5);
+      var poxY = importantMessage.slice(6, 7);
 
-      player[poxY][posX][0] < 100
-      
+      if (computer[poxY][posX][0] < 100) {
+        setImage(poxY, poxY, 103, false);
+      } else if (computer[poxY][posX][0] == 100) {
+        setImage(poxY, posX, 102, false);
+      }
       
 
       // ToDo: Wir haben getroffen! Im Spielfeld anzeigen! Wir dürfen nochmal!
