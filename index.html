@@ -58,14 +58,17 @@ var playerIP;
 var interval;
 var time;
 var autoIncrementID = 0;
+var myID = 0;
 var myTurn = false;
+var posX;
+var posY;
+var hitCount = 0;
 
 $j(document).ready(function(){
 
   $j('#start-game').hide();
   
   socket.on('mmtBattleShips', function (data) {
-    //console.log(data);
 
     var dataLength = data.length;
     var importantMessage = data.slice(9, dataLength)
@@ -78,9 +81,83 @@ $j(document).ready(function(){
     var checkGame = data.slice(0, 8);
     if ( checkGame != 'mmtships' )
       return;
-    
-    var playerMessage;
 
+    if (importantMessage.slice(0, 12) == 'positionsset') {
+      myID = 1;
+
+      $j('#start-game').fadeOut('slow', function() {});
+
+      var msg = 'mmtships:okyourturn:' + myID;
+      socket.emit('playRequest', msg, playerIP);
+    }
+    else if (importantMessage.slice(0,10) == 'okyourturn') {
+      myID = 2;
+      myTurn = true;
+    }
+    else if (importantMessage.slice(0,4) == 'shot') {
+      autoIncrementID = parseInt(importantMessage.slice(importantMessage.lastIndexOf(':') + 1, importantMessage.length));
+      if(autoIncrementID > myID)
+          myID += 2;
+
+      posX = importantMessage.slice(5,6);
+      posY = importantMessage.slice(7,8);
+
+      var msg;
+
+      if (player[posY][posX][0] < 100) {
+        setImage(posY, posX, 103, false);
+        msg = 'mmtships:hit:' + myID;
+        socket.emit('playRequest', msg, playerIP);
+        
+        hitCount++;
+        if (hitCount == 30) {
+          alert(playerName + ' hat gewonnen!');
+          socket.emit('playRequest', 'mmtships:allshipsdestroyed:' + myID, playerIP);
+        }
+      } else if (player[posY][posX][0] == 100) {
+        setImage(posY, posX, 102, false);
+        msg = 'mmtships:miss:' + myID;
+        socket.emit('playRequest', msg, playerIP);
+      }
+    }
+    else if (importantMessage.slice(0,3) == 'hit') {
+      autoIncrementID = parseInt(importantMessage.slice(importantMessage.lastIndexOf(':') + 1, importantMessage.length));
+      if(autoIncrementID > myID)
+          myID += 2;
+
+      setImage(posY, posX, 103, true);
+
+      myTurn = true;
+    }
+    else if (importantMessage.slice(0,4) == 'miss') {
+      autoIncrementID = parseInt(importantMessage.slice(importantMessage.lastIndexOf(':') + 1, importantMessage.length));
+      if(autoIncrementID > myID)
+          myID += 2;
+
+      setImage(posY, posX, 102, true);
+
+      myTurn = false;
+
+      var msg = 'mmtships:nextturn:' + myID;
+      socket.emit('playRequest', msg, playerIP);
+    }
+    else if (importantMessage.slice(0,8) == 'nextturn') {
+      autoIncrementID = parseInt(importantMessage.slice(importantMessage.lastIndexOf(':') + 1, importantMessage.length));
+      if(autoIncrementID > myID)
+        myID += 2;
+      myTurn = true;
+      $j('#game-area').css({
+        'opacity' : '1'
+      });
+    }
+    else if (importantMessage.slice(0,17) == 'allshipsdestroyed') {
+      autoIncrementID = parseInt(importantMessage.slice(importantMessage.lastIndexOf(':') + 1, importantMessage.length));
+      if(autoIncrementID > myID)
+        myID += 2;
+      alert('Du hast gewonnen!');
+    }
+
+    var playerMessage;
     // if there is an message behind the player's name, work with it!
     if (foundColon != -1) {
       playerName = importantMessage.slice(0, foundColon);
@@ -119,64 +196,6 @@ $j(document).ready(function(){
         writePlayerList(playerName, playerIP);
       }
     }
-
-    // game
-    var gameMessages = data.slice(0, data.search('#'));
-
-    if (importantMessage.slice(0,12) == 'positionsset') {
-      // autoIncrementID = parseInt(gameMessages.slice(gameMessages.lastIndexOf(':') + 1, gameMessages.length));
-      // autoIncrementID++;
-      alert ('your turn');
-      var msg = 'mmtships:okyourturn';
-      socket.emit('playRequest', msg, playerIP);
-    } 
-    else if (importantMessage.slice(0,10) == 'okyourturn') {
-      myTurn = true;
-    } 
-    else if (importantMessage.slice(0,4) == 'shot') {
-      autoIncrementID = parseInt(gameMessages.slice(gameMessages.lastIndexOf(':') + 1, gameMessages.length));
-      autoIncrementID++;
-
-      var posX = importantMessage.slice(5, 6);
-      var poxY = importantMessage.slice(7, 8);
-      var msg;
-
-      if (player[poxY][posX][0] < 100) {
-        setImage(poxY, posX, 103, true);
-        msg = 'mmtships:hit:' + autoIncrementID;
-        socket.emit('playRequest', msg, playerIP);
-      } else if (player[poxY][posX][0] == 100) {
-        setImage(poxY, posX, 102, true);
-        msg = 'mmtships:miss:' + autoIncrementID;
-        socket.emit('playRequest', msg, playerIP);
-      }
-    } 
-    else if (importantMessage.slice(0,3) == 'hit') {
-      // autoIncrementID = parseInt(gameMessages.slice(gameMessages.lastIndexOf(':') + 1, gameMessages.length));
-      // autoIncrementID++;
-      var posX = importantMessage.slice(4, 5);
-      var poxY = importantMessage.slice(6, 7);
-
-      if (computer[poxY][posX][0] < 100) {
-        setImage(poxY, poxY, 103, false);
-      } else if (computer[poxY][posX][0] == 100) {
-        setImage(poxY, posX, 102, false);
-      }
-      
-
-      // ToDo: Wir haben getroffen! Im Spielfeld anzeigen! Wir dürfen nochmal!
-    } 
-    else if (importantMessage.slice(0,4) == 'miss') {
-      // ToDo: Wir haben nichts getroffen! Im Spielfeld anzeigen!
-    } 
-    else if (importantMessage.slice(0,8) == 'nextturn') {
-      socket.emit('closeSocket');
-      // ToDo: Der Gegner hat nichts getroffen - also sind wir wieder dran!
-    } 
-    else if (importantMessage.slice(0,17) == 'allshipsdestroyed') {
-      alert('Du hast gewonnen!');
-    }
-
   });
 
   $j('#button').click(function(event) {
@@ -214,13 +233,12 @@ $j(document).ready(function(){
       'display' : 'block',
       'opacity' : '0.2'
     });
-    // ToDo: Spiel starten!
 
     $j('#start-game').fadeIn('slow', function() {});
   }
 
   $j('#start-game').click(function(event) {
-    socket.emit('serverSocket', 'mmtships:positionsset:' + autoIncrementID);
+    socket.emit('playRequest', 'mmtships:positionsset:0', playerIP);
     $j('#game-area').css({
       'opacity' : '1'
     });
@@ -359,31 +377,13 @@ function gridClick(y,x) {
   if ( myTurn == false) 
     return;
 
-  socket.emit('playRequest', 'mmtships:shot:' + x + ':' + y, selectedPlayerIP);
+  posX = x;
+  posY = y;
 
-  /* if ( playflag ) {
-    if (computer[y][x][0] < 100) {
-      setImage(y,x,103,true);
-      var shipno = computer[y][x][1];
-      if ( --computersships[shipno][1] == 0 ) {
-        sinkShip(computer,shipno,true);
-        alert("Sie haben mein "+shiptypes[computersships[shipno][0]][0]+" versenkt!");
-        updateStatus();
-        if ( --computerlives == 0 ) {
-          alert("Sie haben gewonnen!");
-          playflag = false;
-        }
-      }
-      if ( playflag ) 
-        computerMove();
-    } else if (computer[y][x][0] == 100) {
-      setImage(y,x,102,true);
-      computerMove();
-    }
-  } */
+  var msg = 'mmtships:shot:' + x + ':' + y + ':' + myID;
+  socket.emit('playRequest', msg, playerIP);
 }
 
-/* Function to make the computers move. Note that the computer does not cheat, oh no! */
 function computerMove() {
   var x,y,pass;
   var sx,sy;
@@ -410,34 +410,36 @@ function computerMove() {
               else if ( nrt && ylt) { sx = x+1; selected=true; }
               else if ( nup && ydn) { sy = y-1; selected=true; }
               else if ( ndn && yup) { sy = y+1; selected=true; }
-          } else {
-          /* Second pass look for single explosion - fire shots all around it */
-            if ( nlt ) { sx=x-1; selected=true; }
+            } else {
+              /* Second pass look for single explosion - fire shots all around it */
+              if ( nlt ) { sx=x-1; selected=true; }
               else if ( nrt ) { sx=x+1; selected=true; }
               else if ( nup ) { sy=y-1; selected=true; }
               else if ( ndn ) { sy=y+1; selected=true; }
             }
+          }
         }
       }
     }
-  }
   if ( !selected ) {
-    /* Nothing found in 'shoot to kill' mode, so we're just taking potshots. Random shots are in a chequerboard pattern for maximum efficiency, and never twice in the same place */
-    do{
+    /* Nothing found in 'shoot to kill' mode, so we're just taking
+       potshots. Random shots are in a chequerboard pattern for
+       maximum efficiency, and never twice in the same place */
+    do {
       sy = Math.floor(Math.random() * gridy);
       sx = Math.floor(Math.random() * gridx/2)*2+sy%2;
     } while( player[sy][sx][0]>100 );
-  }
+    }
   if (player[sy][sx][0] < 100) {
     /* Hit something */
     setImage(sy,sx,103,false);
     var shipno = player[sy][sx][1];
     if ( --playersships[shipno][1] == 0 ) {
       sinkShip(player,shipno,false);
-      alert("Ich habe Ihr "+shiptypes[playersships[shipno][0]][0]+" versenkt!");
+      alert("I sank your "+shiptypes[playersships[shipno][0]][0]+"!");
       if ( --playerlives == 0 ) {
         knowYourEnemy();
-        alert("Ich habe gewonnen!");
+        alert("Dein Gegner hat gewonnen!");
         playflag = false;
       }
     }
@@ -446,7 +448,6 @@ function computerMove() {
     setImage(sy,sx,102,false);
   }
 }
-
 /* When whole ship is hit, show it using changed graphics */
 function sinkShip(grid,shipno,ispc) {
   var y,x;

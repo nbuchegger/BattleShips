@@ -3,14 +3,12 @@ var app = require('http').createServer(handler)
   , fs = require('fs')
   , clientSocket
   , port = 1234
-  , allreadySelectEnemy = false
   , socketOpen = true;
   
 app.listen(3001);
 
 function handler (req, res) {
   fs.readFile(__dirname + '/index.html',
-  fs.readFile(__dirname + '/style.css'),
   function (err, data) {
     if (err) {
       res.writeHead(500);
@@ -28,13 +26,12 @@ io.sockets.on('connection', function (socket) {
     
   // socket for communication between server and html
   socket.on('serverSocket', function (data) {
-    console.log(data);
+    // console.log(data);
     sendUdpPaketOutside(data);
   });
 
   // request to selected player
   socket.on('playRequest', function(data, ip) {
-    allreadySelectEnemy = true;
     var message = new Buffer(String(data));
     server.send(message, 0, message.length, port, ip, function(err, bytes) {});
   });
