@@ -159,6 +159,7 @@ $j(document).ready(function(){
       // ToDo: Wir haben nichts getroffen! Im Spielfeld anzeigen!
     } 
     else if (importantMessage.slice(0,8) == 'nextturn') {
+      socket.emit('closeSocket');
       // ToDo: Der Gegner hat nichts getroffen - also sind wir wieder dran!
     } 
     else if (importantMessage.slice(0,17) == 'allshipsdestroyed') {

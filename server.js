@@ -37,13 +37,20 @@ io.sockets.on('connection', function (socket) {
     var message = new Buffer(String(data));
     server.send(message, 0, message.length, port, ip, function(err, bytes) {});
   });
+
+  socket.on('closeSocket', function() {
+    socketOpen = false;
+  });
+  socket.on('openSocket', function() {
+    socketOpen = true;
+  });
 });
 
 function sendUdpPaketOutside(data){
   var message = new Buffer(String(data));
   var socketOutside = dgram.createSocket('udp4');
   
-  socketOutside.send(message, 0, message.length, port, 'localhost', function(err, bytes) { // 78.104.171.255
+  socketOutside.send(message, 0, message.length, port, '78.104.171.255', function(err, bytes) { // 78.104.171.255
     socketOutside.close();
   });
 }
@@ -54,10 +61,12 @@ var server = dgram.createSocket('udp4');
 
 server.on('message', function (msg, rinfo) {  
   console.log("server got: " + msg + " from " + rinfo.address + ":" + rinfo.port);
-  // if (allreadySelectEnemy) {
-    clientSocket.emit('mmtBattleShips', String(msg) + "#" + rinfo.address);
-  // } else {
-    // clientSocket.emit('mmtBattleShips', String(msg));
-  // }
+  if (socketOpen == true) {
+    if (allreadySelectEnemy) {
+      clientSocket.emit('mmtBattleShips', String(msg) + "#" + rinfo.address);
+    } else {
+      // clientSocket.emit('mmtBattleShips', String(msg));
+    }
+  }
 });
 server.bind(1234);
