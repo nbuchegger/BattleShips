@@ -140,19 +140,26 @@ $j(document).ready(function(){
       var poxY = importantMessage.slice(7, 8);
       var msg;
 
-      if (computer[poxY][posX][0] < 100) {
+      if (player[poxY][posX][0] < 100) {
         setImage(poxY, posX, 103, true);
         msg = 'mmtships:hit:' + autoIncrementID;
         socket.emit('playRequest', msg, selectedPlayerIP);
-      } else if (computer[poxY][posX][0] == 100) {
+      } else if (player[poxY][posX][0] == 100) {
         setImage(poxY, posX, 102,true);
         msg = 'mmtships:miss:' + autoIncrementID;
         socket.emit('playRequest', msg, selectedPlayerIP);
       }
     } 
     else if (importantMessage.slice(0,3) == 'hit') {
-      autoIncrementID = parseInt(gameMessages.slice(gameMessages.lastIndexOf(':') + 1, gameMessages.length));
-      autoIncrementID++;
+      // autoIncrementID = parseInt(gameMessages.slice(gameMessages.lastIndexOf(':') + 1, gameMessages.length));
+      // autoIncrementID++;
+      var posX = importantMessage.slice(5, 6);
+      var poxY = importantMessage.slice(7, 8);
+
+      player[poxY][posX][0] < 100
+      
+      
+
       // ToDo: Wir haben getroffen! Im Spielfeld anzeigen! Wir dürfen nochmal!
     } 
     else if (importantMessage.slice(0,4) == 'miss') {
@@ -188,13 +195,13 @@ $j(document).ready(function(){
   }
 
   function writePlayerList(name, ip) {
-    // if (name != myPlayerName) {
+    if (name != myPlayerName) {
       $j('#player-online').append('<p class="players">' + name + ':' + ip + '</p>');
 
       // don't forget: answer to request of other players with current playing state
       var msg = 'mmtships:' + myPlayerName + ':' + myPlayState;
       socket.emit('playRequest', msg, ip);
-    // }
+    }
   }
 
   function startGame() {

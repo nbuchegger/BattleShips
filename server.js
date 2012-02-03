@@ -3,7 +3,8 @@ var app = require('http').createServer(handler)
   , fs = require('fs')
   , clientSocket
   , port = 1234
-  , allreadySelectEnemy = false;
+  , allreadySelectEnemy = false
+  , socketOpen = true;
   
 app.listen(3001);
 
@@ -62,11 +63,11 @@ var server = dgram.createSocket('udp4');
 server.on('message', function (msg, rinfo) {  
   console.log("server got: " + msg + " from " + rinfo.address + ":" + rinfo.port);
   if (socketOpen == true) {
-    if (allreadySelectEnemy) {
+    // if (allreadySelectEnemy) {
       clientSocket.emit('mmtBattleShips', String(msg) + "#" + rinfo.address);
-    } else {
-      // clientSocket.emit('mmtBattleShips', String(msg));
-    }
+    // } else {
+    //   clientSocket.emit('mmtBattleShips', String(msg) + "#" + rinfo.address);
+    // }
   }
 });
 server.bind(1234);
